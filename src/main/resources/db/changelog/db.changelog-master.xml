@@ -6,4 +6,20 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
+    <include file="db/changelog/fournisseur-changelog.xml"/>
+
+    <include file="db/changelog/produit-changelog.xml"/>
+
+    <include file="db/changelog/commande-changelog.xml"/>
+
+    <include file="db/changelog/commande-produit-changelog.xml"/>
+
+    <include file="db/changelog/stock-changelog.xml"/>
+
+    <include file="db/changelog/mouvement-stock-changelog.xml"/>
+
+    <include file="db/changelog/bon-sortie-changelog.xml"/>
+
+    <include file="db/changelog/bon-sortie-ligne-changelog.xml"/>
+
 </databaseChangeLog>
