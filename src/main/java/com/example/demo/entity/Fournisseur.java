@@ -21,13 +21,15 @@ public class Fournisseur {
     private Long id;
 
     @NotBlank(message = "La raison social du fournisseur est obligatoire")
-    private String raison_sociale;
+    @Column(name ="raison_sociale")
+    private String raisonSociale;
 
     @NotBlank(message = "l'adress est obligatoire")
     private String adresse;
 
     @NotBlank(message = "personne_contact est obligatoire")
-    private String personne_contact;
+    @Column(name ="personne_contact")
+    private String personneContact;
 
     @NotBlank(message = "le email est obligatoire")
     @Email(message = "email non valide")

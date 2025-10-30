@@ -1,5 +1,6 @@
 package com.example.demo.dto.fournisseur;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class RequestFournisseurDTO {
 
     @NotBlank(message = "L'email est obligatoire")
     @Email(message = "Email non valide")
+    @Column(unique = true)
     private String email;
 
     @NotBlank(message = "Le téléphone est obligatoire")
