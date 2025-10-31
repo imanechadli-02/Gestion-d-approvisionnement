@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.fournisseur.RequestFournisseurDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
+import com.example.demo.entity.Fournisseur;
 import com.example.demo.service.FournisseurService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/fournisseur")
+@RequestMapping("/api/v1/fournisseurs")
 @RequiredArgsConstructor
 
 public class FournisseurController {
@@ -30,5 +31,23 @@ public class FournisseurController {
     public ResponseEntity<List<ResponseFournisseurDTO>>  getALLFournisseur(){
         List<ResponseFournisseurDTO> fournisseursDTO = fournisseurService.findAll();
         return new ResponseEntity<>(fournisseursDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseFournisseurDTO>  getFournisseur(@PathVariable Long id){
+        ResponseFournisseurDTO response = fournisseurService.findById(id);
+        return  new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseFournisseurDTO> updateFournisseur(@PathVariable Long id, @RequestBody RequestFournisseurDTO requestDTO){
+        ResponseFournisseurDTO responseFournisseurDTO =fournisseurService.update(id, requestDTO);
+        return new ResponseEntity<>(responseFournisseurDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFournisseur(@PathVariable Long id){
+        fournisseurService.deleteFournisseur(id);
+        return new ResponseEntity<>("Le fournisseur à été supprimer avec succées de id : "+id,HttpStatus.NO_CONTENT);
     }
 }
