@@ -3,8 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.fournisseur.RequestFournisseurDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
-import com.example.demo.entity.Fournisseur;
-import com.example.demo.service.FournisseurService;
+import com.example.demo.service.impl.FournisseurServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 
 public class FournisseurController {
-    private final FournisseurService fournisseurService;
+    private final FournisseurServiceImpl fournisseurService;
 
     @PostMapping
     public ResponseEntity<ResponseFournisseurDTO> createFournisseur(
@@ -29,19 +28,19 @@ public class FournisseurController {
 
     @GetMapping
     public ResponseEntity<List<ResponseFournisseurDTO>>  getALLFournisseur(){
-        List<ResponseFournisseurDTO> fournisseursDTO = fournisseurService.findAll();
+        List<ResponseFournisseurDTO> fournisseursDTO = fournisseurService.FindALLFournisseur();
         return new ResponseEntity<>(fournisseursDTO, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseFournisseurDTO>  getFournisseur(@PathVariable Long id){
-        ResponseFournisseurDTO response = fournisseurService.findById(id);
+        ResponseFournisseurDTO response = fournisseurService.findFournisserById(id);
         return  new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseFournisseurDTO> updateFournisseur(@PathVariable Long id, @RequestBody RequestFournisseurDTO requestDTO){
-        ResponseFournisseurDTO responseFournisseurDTO =fournisseurService.update(id, requestDTO);
+        ResponseFournisseurDTO responseFournisseurDTO =fournisseurService.updateFournisseur(id, requestDTO);
         return new ResponseEntity<>(responseFournisseurDTO, HttpStatus.OK);
     }
 
