@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "produit")
@@ -40,4 +41,8 @@ public class Produit {
 
     @Column(name = "unite_mesure", length = 20)
     private String uniteMesure;
+
+    @OneToMany(mappedBy = "produit")
+    private List<CommandeProduit> commandeProduits;
+
 }

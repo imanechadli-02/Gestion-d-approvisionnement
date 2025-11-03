@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "fournisseur")
 @Data
@@ -45,5 +47,8 @@ public class Fournisseur {
     @NotBlank(message = "ice est obligatoire")
     @Column(nullable=false)
     private String ice;
+
+    @OneToMany(mappedBy = "fournisseur")
+    private List<Commande> commandes;
 
 }
