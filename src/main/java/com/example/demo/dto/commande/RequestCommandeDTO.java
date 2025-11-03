@@ -1,5 +1,7 @@
 package com.example.demo.dto.commande;
 
+import com.example.demo.dto.CommandeProduit.RequestCommandeProduitDTO;
+import com.example.demo.dto.CommandeProduit.ResponseCommandeProduitDTO;
 import com.example.demo.entity.enums.StatutCommande;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -25,7 +27,8 @@ public class RequestCommandeDTO {
     @NotNull(message = "Le fournisseur est obligatoire")
     private Long fournisseurId;
 
-   // private List<CommandeProduitDTO> produits;
+    @NotNull(message = "La liste des produits est obligatoire")
+    private List<RequestCommandeProduitDTO> produits;
 
 
 }

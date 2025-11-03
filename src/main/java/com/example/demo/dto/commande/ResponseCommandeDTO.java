@@ -1,5 +1,6 @@
 package com.example.demo.dto.commande;
 
+import com.example.demo.dto.CommandeProduit.ResponseCommandeProduitDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
 import com.example.demo.entity.enums.StatutCommande;
 import lombok.AllArgsConstructor;
@@ -17,8 +18,7 @@ public class ResponseCommandeDTO {
     private LocalDate dateCommande;
     private Double montantTotal;
     private StatutCommande statutCommande;
-    private ResponseFournisseurDTO fournisseur;
-    //private List<CommandeProduitResponseDTO> produits;
-
-
+    private Long fournisseurId;
+    private String fournisseurNom;
+    private List<ResponseCommandeProduitDTO> produits;
 }
