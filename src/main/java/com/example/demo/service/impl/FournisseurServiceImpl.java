@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.fournisseur.RequestFournisseurDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
 import com.example.demo.entity.Fournisseur;
+import com.example.demo.exception.DuplicateResourceException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.FournisseurMapper;
 import com.example.demo.repository.FournisseurRepository;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,9 +26,22 @@ public class FournisseurServiceImpl implements FournisseurService {
     @Transactional
     @Override
     public ResponseFournisseurDTO createFournisseur(RequestFournisseurDTO requestDTO) {
-        if(requestDTO == null){
-            throw new IllegalArgumentException("le fournisseur ne peut pas être null");
-        }
+        List<String> erreurs = new ArrayList<>();
+
+            if(emailExists(requestDTO.getEmail())){
+                erreurs.add("email déja existe");
+            }
+            if(iceExists(requestDTO.getIce())){
+                if(iceExists(requestDTO.getIce())){
+                    erreurs.add("ice déja existe");
+                }
+            }
+
+            if(!erreurs.isEmpty()){
+                throw new DuplicateResourceException(erreurs);
+            }
+
+
         Fournisseur fournisseur = fournisseurMapper.toEntity(requestDTO);
         Fournisseur saved = fournisseurRepository.save(fournisseur);
         return fournisseurMapper.toResponseDTO(saved);
@@ -65,6 +80,16 @@ public class FournisseurServiceImpl implements FournisseurService {
             throw new ResourceNotFoundException("Fournisseur non trouvé avec id : " + id);
         }
         fournisseurRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean emailExists(String email){
+        return fournisseurRepository.existsFournisseurByEmail(email);
+    }
+
+    @Override
+    public boolean iceExists(String ice){
+        return fournisseurRepository.existsFournisseurByIce(ice);
     }
 
 }

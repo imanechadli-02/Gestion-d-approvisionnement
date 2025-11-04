@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.fournisseur.RequestFournisseurDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
+import com.example.demo.exception.DuplicateResourceException;
 import com.example.demo.service.impl.FournisseurServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,8 @@ public class FournisseurController {
     private final FournisseurServiceImpl fournisseurService;
 
     @PostMapping
-    public ResponseEntity<ResponseFournisseurDTO> createFournisseur(
-            @Valid @RequestBody RequestFournisseurDTO requestdto){
+    public ResponseEntity<ResponseFournisseurDTO> createFournisseur(@Valid @RequestBody RequestFournisseurDTO requestdto)
+    {
         ResponseFournisseurDTO response = fournisseurService.createFournisseur(requestdto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

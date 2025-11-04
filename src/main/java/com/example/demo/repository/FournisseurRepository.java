@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FournisseurRepository extends JpaRepository<Fournisseur,Long> {
+    boolean existsFournisseurByEmail(String email);
+    boolean existsFournisseurByIce(String nom);
 }
