@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CommandeService {
     ResponseCommandeDTO createCommande(RequestCommandeDTO requestDTO);
-    List<ResponseFournisseurDTO> findAllProduits();
+    List<ResponseCommandeDTO> findAllCommandes();
     ResponseCommandeDTO findCommandeById(Long id);
     ResponseCommandeDTO updateCommandeById(Long id, RequestCommandeDTO requestDTO);
     void deleteCommande(Long id);

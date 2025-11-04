@@ -60,9 +60,10 @@ public class CommandeServiceImpl implements CommandeService {
         return commandeMapper.toResponseDTO(savedCommande);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ResponseFournisseurDTO> findAllProduits() {
-        return List.of();
+    public List<ResponseCommandeDTO> findAllCommandes() {
+        return commandeRepository.findAll().stream().map(commandeMapper::toResponseDTO).toList();
     }
 
     @Override
