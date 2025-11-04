@@ -32,4 +32,15 @@ public class CommandeController {
         return new ResponseEntity<>(commandeService.findAllCommandes(), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseCommandeDTO> findById(@PathVariable Long id){
+         return  new ResponseEntity<>(commandeService.findCommandeById(id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCommande(@PathVariable Long id){
+        commandeService.deleteCommande(id);
+        return new ResponseEntity<>("la suppression avec id : "+id+" se fait avec succée",HttpStatus.OK);
+    }
+
 }

@@ -7,6 +7,7 @@ import com.example.demo.entity.Commande;
 import com.example.demo.entity.CommandeProduit;
 import com.example.demo.entity.Fournisseur;
 import com.example.demo.entity.Produit;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.CommandeMapper;
 import com.example.demo.repository.CommandeRepository;
 import com.example.demo.repository.FournisseurRepository;
@@ -68,7 +69,8 @@ public class CommandeServiceImpl implements CommandeService {
 
     @Override
     public ResponseCommandeDTO findCommandeById(Long id) {
-        return null;
+
+        return commandeMapper.toResponseDTO(commandeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Commande n'existe pas de id :"+id))) ;
     }
 
     @Override
@@ -78,5 +80,9 @@ public class CommandeServiceImpl implements CommandeService {
 
     @Override
     public void deleteCommande(Long id) {
+        if(!commandeRepository.existsById(id)){
+            throw new ResourceNotFoundException("Commande n'existe pas de id : "+id);
+        }
+        commandeRepository.deleteById(id);
     }
 }
