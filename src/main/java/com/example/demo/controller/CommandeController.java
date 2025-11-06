@@ -21,6 +21,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommandeController {
     private final CommandeServiceImpl commandeService;
+
+
+    @PostMapping("/test")
+    public ResponseEntity<String> test(@RequestBody String body) {
+        System.out.println("Body reçu : " + body);
+        return ResponseEntity.ok("Reçu !");
+    }
+
+
     @PostMapping
     public ResponseEntity<ResponseCommandeDTO> ajouterCommande(@Valid @RequestBody RequestCommandeDTO commandeDTO) {
         ResponseCommandeDTO responseCommandeDTO = commandeService.createCommande(commandeDTO);
@@ -35,6 +44,15 @@ public class CommandeController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseCommandeDTO> findById(@PathVariable Long id){
          return  new ResponseEntity<>(commandeService.findCommandeById(id), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseCommandeDTO> updateCommande(
+            @PathVariable Long id,
+            @Valid @RequestBody RequestCommandeDTO commandeDTO) {
+
+        ResponseCommandeDTO updatedCommande = commandeService.updateCommande(id, commandeDTO);
+        return new ResponseEntity<>(updatedCommande, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

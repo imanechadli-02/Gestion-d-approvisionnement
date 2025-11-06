@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -74,9 +75,54 @@ public class CommandeServiceImpl implements CommandeService {
     }
 
     @Override
-    public ResponseCommandeDTO updateCommandeById(Long id, RequestCommandeDTO requestDTO) {
-        return null;
+    @Transactional
+    public ResponseCommandeDTO updateCommande(Long id, RequestCommandeDTO requestDTO) {
+
+        // Vérification
+        if(requestDTO == null){
+            throw new IllegalArgumentException("La commande ne peut pas être nulle");
+        }
+
+        Commande existingCommande = commandeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Commande non trouvée avec id: " + id));
+
+        // Récupérer le fournisseur
+        Fournisseur fournisseur = fournisseurRepository.findById(requestDTO.getFournisseurId())
+                .orElseThrow(() -> new IllegalArgumentException("Fournisseur introuvable"));
+
+        existingCommande.setDateCommande(requestDTO.getDateCommande());
+        existingCommande.setStatutCommande(requestDTO.getStatutCommande());
+        existingCommande.setFournisseur(fournisseur);
+
+        // Mettre à jour les produits
+        List<CommandeProduit> commandeProduits = new ArrayList<>(
+                requestDTO.getProduits().stream()
+                        .map(produitDto -> {
+                            Produit produit = produitRepository.findById(produitDto.getId())
+                                    .orElseThrow(() -> new IllegalArgumentException("Produit introuvable avec id: " + produitDto.getId()));
+                            CommandeProduit cp = new CommandeProduit();
+                            cp.setCommande(existingCommande);
+                            cp.setProduit(produit);
+                            cp.setQuantite(produitDto.getQuantite());
+                            cp.setPrixUnitaire(produitDto.getPrixUnitaire());
+                            return cp;
+                        }).toList()
+        );
+
+        // Calcul du montant total
+        double montantTotal = commandeProduits.stream()
+                .mapToDouble(cp -> cp.getQuantite() * cp.getPrixUnitaire())
+                .sum();
+
+        existingCommande.setMontantTotal(montantTotal);
+        existingCommande.setCommandeProduits(commandeProduits);
+
+        // Sauvegarder
+        Commande updatedCommande = commandeRepository.save(existingCommande);
+
+        return commandeMapper.toResponseDTO(updatedCommande);
     }
+
 
     @Override
     public void deleteCommande(Long id) {

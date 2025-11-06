@@ -10,6 +10,6 @@ public interface CommandeService {
     ResponseCommandeDTO createCommande(RequestCommandeDTO requestDTO);
     List<ResponseCommandeDTO> findAllCommandes();
     ResponseCommandeDTO findCommandeById(Long id);
-    ResponseCommandeDTO updateCommandeById(Long id, RequestCommandeDTO requestDTO);
+    ResponseCommandeDTO updateCommande(Long id, RequestCommandeDTO commandeDTO);
     void deleteCommande(Long id);
 }
