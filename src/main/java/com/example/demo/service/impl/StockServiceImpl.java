@@ -8,31 +8,27 @@ import com.example.demo.mapper.StockMapper;
 import com.example.demo.repository.StockRepository;
 import com.example.demo.service.StockService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Service
 public class StockServiceImpl implements StockService {
     private final StockRepository stockRepository;
     private final StockMapper stockMapper;
-    @Override
-    public ResponseStockDTO createStock(RequestStockDTO requestDTO) {
-        List<String> errors = new ArrayList<>();
-        if(stockRepository.existsStockByNumeroLot(requestDTO.getNumeroLot())){
-            errors.add("Le numero de stock déja existe essayer avec une autre valeur");
-        }
-        if(!errors.isEmpty()){
-            throw new DuplicateResourceException(errors);
-        }
 
-        Stock stock = stockMapper.toStock(requestDTO);
-        Stock saved=stockRepository.save(stock);
-        return stockMapper.toResponseStockDTO(saved);
+
+    @Override
+    public List<ResponseStockDTO> getAllStocks() {
+        List<Stock> stocks = stockRepository.findAll();
+        List<ResponseStockDTO> responseStockDTOS =stocks.stream().map(stockMapper::toResponseStockDTO).toList();
+        return responseStockDTOS;
     }
 
     @Override
-    public ResponseStockDTO updateStock(RequestStockDTO requestDTO) {
-        return null;
+    public List<ResponseStockDTO> getStocksByProduit(Long produitId) {
+        return List.of();
     }
 }
