@@ -12,4 +12,5 @@ public interface CommandeService {
     ResponseCommandeDTO findCommandeById(Long id);
     ResponseCommandeDTO updateCommandeById(Long id, RequestCommandeDTO requestDTO);
     void deleteCommande(Long id);
+    void validerCommande(Long id);
 }

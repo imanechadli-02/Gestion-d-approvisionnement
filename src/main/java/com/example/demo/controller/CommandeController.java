@@ -43,4 +43,10 @@ public class CommandeController {
         return new ResponseEntity<>("la suppression avec id : "+id+" se fait avec succée",HttpStatus.OK);
     }
 
+    @GetMapping("/validerCommande/{id}")
+    public ResponseEntity<String> validerCommandeById(@PathVariable Long id){
+        commandeService.validerCommande(id);
+        return new ResponseEntity<>("l'ajout des stock se fait avec succées",HttpStatus.OK);
+    }
+
 }

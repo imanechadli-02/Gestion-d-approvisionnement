@@ -3,20 +3,24 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.commande.RequestCommandeDTO;
 import com.example.demo.dto.commande.ResponseCommandeDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
-import com.example.demo.entity.Commande;
-import com.example.demo.entity.CommandeProduit;
-import com.example.demo.entity.Fournisseur;
-import com.example.demo.entity.Produit;
+import com.example.demo.dto.stock.RequestStockDTO;
+import com.example.demo.entity.*;
+import com.example.demo.entity.enums.StatutCommande;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.mapper.CommandeMapper;
+import com.example.demo.mapper.DetailsCommandeVersStockMapper;
+import com.example.demo.mapper.StockMapper;
 import com.example.demo.repository.CommandeRepository;
 import com.example.demo.repository.FournisseurRepository;
 import com.example.demo.repository.ProduitRepository;
+import com.example.demo.repository.StockRepository;
 import com.example.demo.service.CommandeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,6 +30,8 @@ public class CommandeServiceImpl implements CommandeService {
     private final FournisseurRepository fournisseurRepository;
     private final ProduitRepository produitRepository;
     private final CommandeMapper commandeMapper;
+    private final DetailsCommandeVersStockMapper detailsCommandeVersStockMapper;
+    private final StockRepository stockRepository;
 
     @Override
     @Transactional
@@ -62,6 +68,7 @@ public class CommandeServiceImpl implements CommandeService {
     }
 
     @Transactional(readOnly = true)
+
     @Override
     public List<ResponseCommandeDTO> findAllCommandes() {
         return commandeRepository.findAll().stream().map(commandeMapper::toResponseDTO).toList();
@@ -84,5 +91,63 @@ public class CommandeServiceImpl implements CommandeService {
             throw new ResourceNotFoundException("Commande n'existe pas de id : "+id);
         }
         commandeRepository.deleteById(id);
+    }
+
+    @Override
+
+    public void validerCommande(Long id) {
+
+        Commande commande = commandeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Commande n'existe pas de id :"+id));
+
+            if(!commande.getStatutCommande().equals(StatutCommande.EN_ATTENTE)){
+                throw new IllegalArgumentException("StatutCommande pas en attente donc vous avez pas la possiblité de validee : "+id);
+            }
+
+         commande.getCommandeProduits().forEach(commandeProduit -> {
+            if(commandeProduit == null){
+                throw new IllegalArgumentException("commande produit introuvable");
+            }
+
+            Produit produit = produitRepository.findById(commandeProduit.getProduit().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
+
+            Stock stock= detailsCommandeVersStockMapper.detailsCommandeToStock(commandeProduit, commande, produit);
+            produit.setStockActuel(produit.getStockActuel()+commandeProduit.getQuantite());
+            Stock saved = stockRepository.save(stock);
+            commande.setStatutCommande(StatutCommande.VALIDEE);
+
+        });
+
+        /*
+        ResponseCommandeDTO commandeDTO = findCommandeById(id);
+        if(commandeDTO == null){
+            throw new IllegalArgumentException("Commande n'existe pas de id : "+id);
+        }
+
+        commandeDTO.getProduits().forEach(produitDTO -> {
+            if(produitDTO == null){
+                throw new IllegalArgumentException("Produits introuvable");
+            }
+
+            if(!commandeDTO.getStatutCommande().equals(StatutCommande.EN_ATTENTE)){
+                throw new IllegalArgumentException("StatutCommande pas en attente donc vous avez pas la possiblité de validee : "+id);
+            }
+
+            Commande commande = commandeRepository.findById(commandeDTO.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Commande introuvable"));
+
+            Produit produit = produitRepository.findById(produitDTO.getProduitId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
+
+            Stock stock= detailsCommandeVersStockMapper.detailsCommandeToStock(produitDTO, commande, produit);
+            produit.setStockActuel(produit.getStockActuel()+produitDTO.getQuantite());
+            Stock saved = stockRepository.save(stock);
+            commande.setStatutCommande(StatutCommande.VALIDEE);
+        });
+
+         */
+
+
+
     }
 }
