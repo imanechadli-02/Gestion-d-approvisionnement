@@ -21,4 +21,9 @@ public class MouvementStockimpl implements MouvementStockService {
         return mouvementStockRepository.findAll().stream().map(mouvementStockMapper::toDto).toList();
 
     }
+
+    @Override
+    public List<ResponseMouvementStockDTO> getMouvementsStockByProduitId(Long produitId) {
+        return getMouvementsStock().stream().filter(Rms->Rms.getProduitId().equals(produitId)).toList();
+    }
 }

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface MouvementStockService {
     List<ResponseMouvementStockDTO> getMouvementsStock();
+    List<ResponseMouvementStockDTO>getMouvementsStockByProduitId(Long produitId);
 }

@@ -41,4 +41,10 @@ public class StockController {
         return new ResponseEntity<>(mouvementStocks, HttpStatus.OK);
     }
 
+    @GetMapping("/mouvements/produit/{id}")
+    public ResponseEntity<List<ResponseMouvementStockDTO>> getAllMouvementsByProduit(@PathVariable Long id){
+        List<ResponseMouvementStockDTO> responseMouvementStockDTOS=mouvementStockService.getMouvementsStockByProduitId(id);
+        return new ResponseEntity<>(responseMouvementStockDTOS, HttpStatus.OK);
+    }
+
 }
