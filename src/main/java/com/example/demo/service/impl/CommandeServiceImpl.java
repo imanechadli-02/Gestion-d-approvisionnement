@@ -7,13 +7,8 @@ import com.example.demo.dto.stock.RequestStockDTO;
 import com.example.demo.entity.*;
 import com.example.demo.entity.enums.StatutCommande;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.mapper.CommandeMapper;
-import com.example.demo.mapper.DetailsCommandeVersStockMapper;
-import com.example.demo.mapper.StockMapper;
-import com.example.demo.repository.CommandeRepository;
-import com.example.demo.repository.FournisseurRepository;
-import com.example.demo.repository.ProduitRepository;
-import com.example.demo.repository.StockRepository;
+import com.example.demo.mapper.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.CommandeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,9 +24,11 @@ public class CommandeServiceImpl implements CommandeService {
     private final CommandeRepository commandeRepository;
     private final FournisseurRepository fournisseurRepository;
     private final ProduitRepository produitRepository;
+    private final StockRepository stockRepository;
+    private final MouvementStockRepository mouvementStockRepository;
+    private final StockVersMouvementStockMapper  stockVersMouvementStockMapper;
     private final CommandeMapper commandeMapper;
     private final DetailsCommandeVersStockMapper detailsCommandeVersStockMapper;
-    private final StockRepository stockRepository;
 
     @Override
     @Transactional
@@ -94,7 +91,7 @@ public class CommandeServiceImpl implements CommandeService {
     }
 
     @Override
-
+    @Transactional
     public void validerCommande(Long id) {
 
         Commande commande = commandeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Commande n'existe pas de id :"+id));
@@ -111,12 +108,16 @@ public class CommandeServiceImpl implements CommandeService {
             Produit produit = produitRepository.findById(commandeProduit.getProduit().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
 
-            Stock stock= detailsCommandeVersStockMapper.detailsCommandeToStock(commandeProduit, commande, produit);
-            produit.setStockActuel(produit.getStockActuel()+commandeProduit.getQuantite());
-            Stock saved = stockRepository.save(stock);
-            commande.setStatutCommande(StatutCommande.VALIDEE);
+             Stock stock = detailsCommandeVersStockMapper.detailsCommandeToStock(commandeProduit, commande, produit);
+             Stock savedStock = stockRepository.save(stock);
+
+             MouvementStock mouvementStock = stockVersMouvementStockMapper.stockVersMouvementStock(savedStock);
+             mouvementStockRepository.save(mouvementStock);
+
+             produit.setStockActuel(produit.getStockActuel() + commandeProduit.getQuantite());
 
         });
-
+            commande.setStatutCommande(StatutCommande.VALIDEE);
+            commandeRepository.save(commande);
     }
 }
