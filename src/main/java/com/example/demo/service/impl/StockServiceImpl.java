@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -29,6 +30,8 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public List<ResponseStockDTO> getStocksByProduit(Long produitId) {
-        return List.of();
+        return getAllStocks().stream().filter(p -> p.getProduitId() == produitId)
+                .sorted(Comparator.comparing(ResponseStockDTO::getDateEntree)).
+                toList();
     }
 }

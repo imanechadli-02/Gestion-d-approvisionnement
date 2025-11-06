@@ -6,13 +6,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/stock")
+@RequestMapping("api/v1/stocks")
 @RequiredArgsConstructor
 public class StockController {
     private final StockServiceImpl stockService;
@@ -21,6 +22,12 @@ public class StockController {
     public ResponseEntity<List<ResponseStockDTO>> getStock(){
         List<ResponseStockDTO> stocks = stockService.getAllStocks();
         return new ResponseEntity<>(stocks, HttpStatus.OK);
+    }
+
+    @GetMapping("produit/{id}")
+    public ResponseEntity<List<ResponseStockDTO>> getStockByProduit(@PathVariable Long id){
+        List<ResponseStockDTO> stoks=stockService.getStocksByProduit(id);
+        return new ResponseEntity<>(stoks, HttpStatus.OK);
     }
 
 }
