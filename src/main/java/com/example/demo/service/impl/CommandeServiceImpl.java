@@ -118,36 +118,5 @@ public class CommandeServiceImpl implements CommandeService {
 
         });
 
-        /*
-        ResponseCommandeDTO commandeDTO = findCommandeById(id);
-        if(commandeDTO == null){
-            throw new IllegalArgumentException("Commande n'existe pas de id : "+id);
-        }
-
-        commandeDTO.getProduits().forEach(produitDTO -> {
-            if(produitDTO == null){
-                throw new IllegalArgumentException("Produits introuvable");
-            }
-
-            if(!commandeDTO.getStatutCommande().equals(StatutCommande.EN_ATTENTE)){
-                throw new IllegalArgumentException("StatutCommande pas en attente donc vous avez pas la possiblité de validee : "+id);
-            }
-
-            Commande commande = commandeRepository.findById(commandeDTO.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Commande introuvable"));
-
-            Produit produit = produitRepository.findById(produitDTO.getProduitId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
-
-            Stock stock= detailsCommandeVersStockMapper.detailsCommandeToStock(produitDTO, commande, produit);
-            produit.setStockActuel(produit.getStockActuel()+produitDTO.getQuantite());
-            Stock saved = stockRepository.save(stock);
-            commande.setStatutCommande(StatutCommande.VALIDEE);
-        });
-
-         */
-
-
-
     }
 }

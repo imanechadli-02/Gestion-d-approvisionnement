@@ -30,5 +30,4 @@ public class RequestCommandeDTO {
     @NotNull(message = "La liste des produits est obligatoire")
     private List<RequestCommandeProduitDTO> produits;
 
-
 }
