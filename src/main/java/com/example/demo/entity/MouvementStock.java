@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="mouvement_stock")
@@ -35,6 +36,6 @@ public class MouvementStock {
 
     @Column(name="date_mouvement")
     @NotNull(message = "La date est obligatoire")
-    private LocalDate dateMouvement;
+    private LocalDateTime dateMouvement;
 
 }

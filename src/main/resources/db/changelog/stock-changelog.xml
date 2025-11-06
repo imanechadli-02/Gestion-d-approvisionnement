@@ -15,7 +15,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="numero_lot" type="VARCHAR(50)"/>
-            <column name="date_entree" type="DATE"/>
+            <column name="date_entree" type="TIMESTAMP"/>
             <column name="quantite" type="INT"/>
             <column name="prix_achat_unitaire" type="DECIMAL(10,2)"/>
             <column name="commande_id" type="BIGINT"/>

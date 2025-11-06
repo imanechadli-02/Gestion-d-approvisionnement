@@ -8,13 +8,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Mapper(componentModel = "spring", imports = LocalDate.class)
+@Mapper(componentModel = "spring", imports = LocalDateTime.class)
 public interface DetailsCommandeVersStockMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "numeroLot", expression = "java(generateNumeroLot(commande.getId(), produit.getId()))")
-    @Mapping(target = "dateEntree", expression = "java(LocalDate.now())")
+    @Mapping(target = "dateEntree", expression = "java(LocalDateTime.now())")
     @Mapping(target = "quantite", source = "commandeProduit.quantite")
     @Mapping(target = "prixAchatUnitaire", source = "commandeProduit.prixUnitaire")
     @Mapping(target = "produit", source = "produit")
