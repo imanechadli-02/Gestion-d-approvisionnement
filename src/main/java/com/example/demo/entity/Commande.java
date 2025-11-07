@@ -40,5 +40,9 @@ public class Commande {
 
     @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL)
     private List<CommandeProduit> commandeProduits;
+    /*
+    @ManyToOne
+    private Stock stock;
+     */
 
 }

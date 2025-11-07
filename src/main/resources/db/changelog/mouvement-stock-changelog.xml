@@ -19,7 +19,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="date_mouvement" type="DATE"/>
+            <column name="date_mouvement" type="TIMESTAMP"/>
         </createTable>
 
         <addForeignKeyConstraint

@@ -2,16 +2,11 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.commande.RequestCommandeDTO;
 import com.example.demo.dto.commande.ResponseCommandeDTO;
-import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
-import com.example.demo.entity.Commande;
-import com.example.demo.entity.CommandeProduit;
-import com.example.demo.entity.Fournisseur;
-import com.example.demo.entity.Produit;
+import com.example.demo.entity.*;
+import com.example.demo.entity.enums.StatutCommande;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.mapper.CommandeMapper;
-import com.example.demo.repository.CommandeRepository;
-import com.example.demo.repository.FournisseurRepository;
-import com.example.demo.repository.ProduitRepository;
+import com.example.demo.mapper.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.CommandeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +21,11 @@ public class CommandeServiceImpl implements CommandeService {
     private final CommandeRepository commandeRepository;
     private final FournisseurRepository fournisseurRepository;
     private final ProduitRepository produitRepository;
+    private final StockRepository stockRepository;
+    private final MouvementStockRepository mouvementStockRepository;
+    private final StockVersMouvementStockMapper  stockVersMouvementStockMapper;
     private final CommandeMapper commandeMapper;
+    private final DetailsCommandeVersStockMapper detailsCommandeVersStockMapper;
 
     @Override
     @Transactional
@@ -63,6 +62,7 @@ public class CommandeServiceImpl implements CommandeService {
     }
 
     @Transactional(readOnly = true)
+
     @Override
     public List<ResponseCommandeDTO> findAllCommandes() {
         return commandeRepository.findAll().stream().map(commandeMapper::toResponseDTO).toList();
@@ -130,5 +130,36 @@ public class CommandeServiceImpl implements CommandeService {
             throw new ResourceNotFoundException("Commande n'existe pas de id : "+id);
         }
         commandeRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void validerCommande(Long id) {
+
+        Commande commande = commandeRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Commande n'existe pas de id :"+id));
+
+            if(!commande.getStatutCommande().equals(StatutCommande.EN_ATTENTE)){
+                throw new IllegalArgumentException("StatutCommande pas en attente donc vous avez pas la possiblité de validee : "+id);
+            }
+
+         commande.getCommandeProduits().forEach(commandeProduit -> {
+            if(commandeProduit == null){
+                throw new IllegalArgumentException("commande produit introuvable");
+            }
+
+            Produit produit = produitRepository.findById(commandeProduit.getProduit().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produit introuvable"));
+
+             Stock stock = detailsCommandeVersStockMapper.detailsCommandeToStock(commandeProduit, commande, produit);
+             Stock savedStock = stockRepository.save(stock);
+
+             MouvementStock mouvementStock = stockVersMouvementStockMapper.stockVersMouvementStock(savedStock);
+             mouvementStockRepository.save(mouvementStock);
+
+             produit.setStockActuel(produit.getStockActuel() + commandeProduit.getQuantite());
+
+        });
+            commande.setStatutCommande(StatutCommande.VALIDEE);
+            commandeRepository.save(commande);
     }
 }
