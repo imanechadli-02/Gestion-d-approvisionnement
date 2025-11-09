@@ -48,4 +48,12 @@ public class BonSortieController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @PutMapping("/{id}/annuler")
+    public ResponseEntity<Void> annulerBonDeSortie(@PathVariable Long id) {
+        bonSortieService.annulerBonDeSortie(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
