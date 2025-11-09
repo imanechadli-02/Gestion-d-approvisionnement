@@ -42,5 +42,10 @@ public class BonSortieController {
         return ResponseEntity.ok(updatedBon);
     }
 
+    @PutMapping("/{id}/valider")
+    public ResponseEntity<Void> validerBonDeSortie(@PathVariable Long id) {
+        bonSortieService.validerBonDeSortie(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }
