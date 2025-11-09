@@ -61,5 +61,10 @@ public class BonSortieController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/atelier/{atelier}")
+    public ResponseEntity<List<ResponseBonSortieDTO>> getBonsDeSortieByAtelier(@PathVariable String atelier) {
+        List<ResponseBonSortieDTO> bons = bonSortieService.findBonsByAtelier(atelier);
+        return ResponseEntity.ok(bons);
+    }
 
 }
