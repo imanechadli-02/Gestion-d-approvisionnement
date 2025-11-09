@@ -28,6 +28,12 @@ public class BonSortieController {
         return ResponseEntity.ok(bons);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseBonSortieDTO> getBonDeSortieById(@PathVariable Long id) {
+        ResponseBonSortieDTO bon = bonSortieService.findBonDeSortieById(id);
+        return ResponseEntity.ok(bon);
+    }
+
 
 
 
