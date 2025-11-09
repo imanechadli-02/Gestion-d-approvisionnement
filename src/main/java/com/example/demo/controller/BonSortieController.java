@@ -35,6 +35,12 @@ public class BonSortieController {
     }
 
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponseBonSortieDTO> updateBonDeSortie(@PathVariable Long id,
+                                                                  @RequestBody RequestBonSortieDTO requestDTO) {
+        ResponseBonSortieDTO updatedBon = bonSortieService.updateBonDeSortie(id, requestDTO);
+        return ResponseEntity.ok(updatedBon);
+    }
 
 
 }
