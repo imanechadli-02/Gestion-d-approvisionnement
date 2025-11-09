@@ -22,5 +22,13 @@ public class BonSortieController {
         return ResponseEntity.ok(createdBon);
     }
 
+    @GetMapping
+    public ResponseEntity<List<ResponseBonSortieDTO>> getAllBonsDeSortie() {
+        List<ResponseBonSortieDTO> bons = bonSortieService.findAllBonsDeSortie();
+        return ResponseEntity.ok(bons);
+    }
+
+
+
 
 }
