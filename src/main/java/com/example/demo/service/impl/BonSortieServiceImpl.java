@@ -36,15 +36,13 @@ public class BonSortieServiceImpl implements BonSortieService {
             throw new IllegalArgumentException("Le bon de sortie ne peut pas être nul");
         }
 
-        // 1️⃣ Créer un nouveau bon de sortie
         BonSortie bonSortie = new BonSortie();
         bonSortie.setNumeroBon(requestDTO.getNumeroBon());
         bonSortie.setDateSortie(LocalDate.now());
         bonSortie.setAtelier(requestDTO.getAtelier());
         bonSortie.setMotif(requestDTO.getMotif());
-        bonSortie.setStatut(StatutBon.BROULLION); // statut initial
+        bonSortie.setStatut(StatutBon.BROULLION);
 
-        // 2️⃣ Ajouter les détails
         requestDTO.getDetails().forEach(detailDTO -> {
             Produit produit = produitRepository.findById(detailDTO.getProduitId())
                     .orElseThrow(() -> new RuntimeException("Produit non trouvé : " + detailDTO.getProduitId()));
@@ -57,10 +55,9 @@ public class BonSortieServiceImpl implements BonSortieService {
             bonSortie.getDetails().add(detail);
         });
 
-        // 3️⃣ Sauvegarde (cascade ALL = détails sauvegardés automatiquement)
         BonSortie saved = bonSortieRepository.save(bonSortie);
 
-        // 4️⃣ Mapper vers un DTO de réponse
+
         return bonSortieMapper.toResponseDTO(saved);
     }
 
@@ -138,12 +135,10 @@ public class BonSortieServiceImpl implements BonSortieService {
         BonSortie bon = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bon non trouvé"));
 
-        // Vérifier le statut avec l'enum
         if (bon.getStatut() != StatutBon.BROULLION) {
             throw new RuntimeException("Seuls les bons en brouillon peuvent être annulés");
         }
 
-        // Changer le statut avec l'enum
         bon.setStatut(StatutBon.ANNULE);
         bonSortieRepository.save(bon);
     }
@@ -152,7 +147,7 @@ public class BonSortieServiceImpl implements BonSortieService {
     public List<ResponseBonSortieDTO> findBonsByAtelier(String atelier) {
         List<BonSortie> bons = bonSortieRepository.findByAtelier(atelier);
         return bons.stream()
-                .map(bonSortieMapper::toResponseDTO) // utiliser le mapper existant
+                .map(bonSortieMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
