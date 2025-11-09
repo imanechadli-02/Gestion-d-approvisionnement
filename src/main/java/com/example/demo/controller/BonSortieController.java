@@ -55,5 +55,11 @@ public class BonSortieController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBonDeSortie(@PathVariable Long id) {
+        bonSortieService.deleteBonDeSortie(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
