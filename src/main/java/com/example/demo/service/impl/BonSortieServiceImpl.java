@@ -2,20 +2,18 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.bonSortie.RequestBonSortieDTO;
 import com.example.demo.dto.bonSortie.ResponseBonSortieDTO;
-import com.example.demo.entity.BonSortie;
-import com.example.demo.entity.BonSortieDetail;
-import com.example.demo.entity.Produit;
+import com.example.demo.entity.*;
 import com.example.demo.entity.enums.StatutBon;
+import com.example.demo.entity.enums.TypeMouvement;
 import com.example.demo.mapper.BonSortieMapper;
-import com.example.demo.repository.BonSortieDetailRepository;
-import com.example.demo.repository.BonSortieRepository;
-import com.example.demo.repository.ProduitRepository;
+import com.example.demo.repository.*;
 import com.example.demo.service.BonSortieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +26,8 @@ public class BonSortieServiceImpl implements BonSortieService {
     private final BonSortieDetailRepository bonSortieDetailRepository;
     private final ProduitRepository produitRepository;
     private final BonSortieMapper bonSortieMapper;
+    private final StockRepository StockRepository;
+    private final MouvementStockRepository MouvementStockRepository;
 
     @Override
     public ResponseBonSortieDTO createBonDeSortie(RequestBonSortieDTO requestDTO) {
@@ -109,26 +109,55 @@ public class BonSortieServiceImpl implements BonSortieService {
     }
 
     @Override
+    @Transactional
     public void validerBonDeSortie(Long id) {
-        BonSortie bonSortie = bonSortieRepository.findById(id)
+        // Récupérer le bon de sortie
+        BonSortie bon = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable avec ID : " + id));
 
-        if (bonSortie.getStatut() != StatutBon.BROULLION) {
-            throw new RuntimeException("Seuls les bons en BROULLION peuvent être validés.");
+        if (bon.getStatut() != StatutBon.BROULLION) {
+            throw new RuntimeException("Seuls les bons en brouillon peuvent être validés.");
         }
 
-        for (BonSortieDetail detail : bonSortie.getDetails()) {
+        // Pour chaque détail du bon
+        for (BonSortieDetail detail : bon.getDetails()) {
             Produit produit = detail.getProduit();
-            if (produit.getStockActuel() < detail.getQuantite()) {
+            int quantiteDemandee = detail.getQuantite();
+
+            // Récupérer les stocks disponibles pour ce produit par FIFO
+            List<Stock> stocks = StockRepository.findByProduitIdOrderByDateEntreeAsc(produit.getId());
+
+            for (Stock s : stocks) {
+                if (quantiteDemandee <= 0) break;
+
+                int quantiteDisponible = s.getQuantite();
+                int quantiteALever = Math.min(quantiteDemandee, quantiteDisponible);
+
+                // Mettre à jour le stock
+                s.setQuantite(quantiteDisponible - quantiteALever);
+                StockRepository.save(s);
+
+                // Créer un mouvement de stock
+                MouvementStock mouvement = new MouvementStock();
+                mouvement.setStock(s);
+                mouvement.setQuantite(quantiteALever);
+                mouvement.setTypeMouvement(TypeMouvement.SORTIE);
+                mouvement.setDateMouvement(LocalDateTime.now());
+                MouvementStockRepository.save(mouvement);
+
+                quantiteDemandee -= quantiteALever;
+            }
+
+            if (quantiteDemandee > 0) {
                 throw new RuntimeException("Stock insuffisant pour le produit : " + produit.getNom());
             }
-            produit.setStockActuel(produit.getStockActuel() - detail.getQuantite());
-            produitRepository.save(produit);
         }
 
-        bonSortie.setStatut(StatutBon.VALIDE);
-        bonSortieRepository.save(bonSortie);
+        // Mettre à jour le statut du bon
+        bon.setStatut(StatutBon.VALIDE);
+        bonSortieRepository.save(bon);
     }
+
 
     @Override
     public void annulerBonDeSortie(Long id) {
