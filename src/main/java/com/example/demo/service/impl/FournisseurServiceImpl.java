@@ -1,11 +1,15 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.commande.ResponseCommandeDTO;
 import com.example.demo.dto.fournisseur.RequestFournisseurDTO;
 import com.example.demo.dto.fournisseur.ResponseFournisseurDTO;
+import com.example.demo.entity.Commande;
 import com.example.demo.entity.Fournisseur;
 import com.example.demo.exception.DuplicateResourceException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.mapper.CommandeMapper;
 import com.example.demo.mapper.FournisseurMapper;
+import com.example.demo.repository.CommandeRepository;
 import com.example.demo.repository.FournisseurRepository;
 import com.example.demo.service.FournisseurService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,8 @@ public class FournisseurServiceImpl implements FournisseurService {
 
     private final FournisseurRepository fournisseurRepository;
     private final FournisseurMapper fournisseurMapper;
+    private  final CommandeRepository commandeRepository;
+    private  final CommandeMapper commandeMapper;
 
     @Transactional
     @Override
@@ -81,6 +87,8 @@ public class FournisseurServiceImpl implements FournisseurService {
         }
         fournisseurRepository.deleteById(id);
     }
+
+
 
     @Override
     public boolean emailExists(String email){

@@ -26,12 +26,11 @@ public class BonSortieServiceImpl implements BonSortieService {
     private final BonSortieDetailRepository bonSortieDetailRepository;
     private final ProduitRepository produitRepository;
     private final BonSortieMapper bonSortieMapper;
-    private final StockRepository StockRepository;
-    private final MouvementStockRepository MouvementStockRepository;
+    private final StockRepository stockRepository;
+    private final MouvementStockRepository mouvementStockRepository;
 
     @Override
     public ResponseBonSortieDTO createBonDeSortie(RequestBonSortieDTO requestDTO) {
-
         if (requestDTO == null) {
             throw new IllegalArgumentException("Le bon de sortie ne peut pas être nul");
         }
@@ -56,8 +55,6 @@ public class BonSortieServiceImpl implements BonSortieService {
         });
 
         BonSortie saved = bonSortieRepository.save(bonSortie);
-
-
         return bonSortieMapper.toResponseDTO(saved);
     }
 
@@ -81,6 +78,11 @@ public class BonSortieServiceImpl implements BonSortieService {
         BonSortie existing = bonSortieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable avec ID : " + id));
 
+        // Vérification : un bon validé ne peut pas être modifié
+        if (existing.getStatut() == StatutBon.VALIDE) {
+            throw new IllegalStateException("Impossible de modifier un bon déjà validé.");
+        }
+
         existing.setAtelier(requestDTO.getAtelier());
         existing.setMotif(requestDTO.getMotif());
         existing.getDetails().clear();
@@ -100,72 +102,80 @@ public class BonSortieServiceImpl implements BonSortieService {
         return bonSortieMapper.toResponseDTO(updated);
     }
 
+
     @Override
     public void deleteBonDeSortie(Long id) {
-        if (!bonSortieRepository.existsById(id)) {
-            throw new RuntimeException("Bon de sortie introuvable avec ID : " + id);
+        BonSortie bon = bonSortieRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable avec ID : " + id));
+
+        // Vérification : un bon validé ne peut pas être supprimé
+        if (bon.getStatut() == StatutBon.VALIDE) {
+            throw new IllegalStateException("Impossible de supprimer un bon déjà validé.");
         }
-        bonSortieRepository.deleteById(id);
+
+        bonSortieRepository.delete(bon);
     }
 
     @Override
     @Transactional
-    public void validerBonDeSortie(Long id) {
-        // Récupérer le bon de sortie
-        BonSortie bon = bonSortieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable avec ID : " + id));
+    public void validerBonDeSortie(Long bonId) {
+        BonSortie bon = bonSortieRepository.findById(bonId)
+                .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable"));
 
         if (bon.getStatut() != StatutBon.BROULLION) {
-            throw new RuntimeException("Seuls les bons en brouillon peuvent être validés.");
+            throw new IllegalStateException("Seuls les bons en brouillon peuvent être validés.");
         }
 
-        // Pour chaque détail du bon
         for (BonSortieDetail detail : bon.getDetails()) {
             Produit produit = detail.getProduit();
             int quantiteDemandee = detail.getQuantite();
 
-            // Récupérer les stocks disponibles pour ce produit par FIFO
-            List<Stock> stocks = StockRepository.findByProduitIdOrderByDateEntreeAsc(produit.getId());
+            List<Stock> lots = stockRepository.findByProduitIdOrderByDateEntreeAsc(produit.getId());
 
-            for (Stock s : stocks) {
+            for (Stock lot : lots) {
                 if (quantiteDemandee <= 0) break;
 
-                int quantiteDisponible = s.getQuantite();
+                int quantiteDisponible = lot.getQuantite();
+                if (quantiteDisponible <= 0) continue;
+
                 int quantiteALever = Math.min(quantiteDemandee, quantiteDisponible);
 
-                // Mettre à jour le stock
-                s.setQuantite(quantiteDisponible - quantiteALever);
-                StockRepository.save(s);
-
-                // Créer un mouvement de stock
                 MouvementStock mouvement = new MouvementStock();
-                mouvement.setStock(s);
+                mouvement.setStock(lot);
                 mouvement.setQuantite(quantiteALever);
                 mouvement.setTypeMouvement(TypeMouvement.SORTIE);
                 mouvement.setDateMouvement(LocalDateTime.now());
-                MouvementStockRepository.save(mouvement);
+                mouvementStockRepository.save(mouvement);
+
+                lot.setQuantite(quantiteDisponible - quantiteALever);
+                stockRepository.save(lot);
 
                 quantiteDemandee -= quantiteALever;
             }
 
             if (quantiteDemandee > 0) {
-                throw new RuntimeException("Stock insuffisant pour le produit : " + produit.getNom());
+                throw new IllegalStateException("Stock insuffisant pour le produit : " + produit.getNom());
             }
         }
 
-        // Mettre à jour le statut du bon
         bon.setStatut(StatutBon.VALIDE);
         bonSortieRepository.save(bon);
     }
 
 
+
+
     @Override
     public void annulerBonDeSortie(Long id) {
         BonSortie bon = bonSortieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bon non trouvé"));
+                .orElseThrow(() -> new RuntimeException("Bon de sortie introuvable avec ID : " + id));
+
+        if (bon.getStatut() == StatutBon.VALIDE) {
+            throw new IllegalStateException("Impossible d'annuler un bon déjà validé.");
+        }
 
         if (bon.getStatut() != StatutBon.BROULLION) {
-            throw new RuntimeException("Seuls les bons en brouillon peuvent être annulés");
+            throw new IllegalStateException("Seuls les bons en brouillon peuvent être annulés.");
         }
 
         bon.setStatut(StatutBon.ANNULE);
@@ -179,6 +189,4 @@ public class BonSortieServiceImpl implements BonSortieService {
                 .map(bonSortieMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
-
-
 }

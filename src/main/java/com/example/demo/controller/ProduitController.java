@@ -44,4 +44,11 @@ public class ProduitController {
         produitService.deleteProduit(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/stock")
+    public ResponseEntity<?> getStockByProduitId(@PathVariable Long id) {
+        return ResponseEntity.ok(produitService.getStockByProduitId(id));
+    }
+
+
 }

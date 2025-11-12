@@ -1,5 +1,6 @@
 package com.example.demo.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -43,9 +44,25 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<String> handleEmptyRequest(HttpMessageNotReadableException ex) {
         return new ResponseEntity<>("Error :Le corps de la requête est vide", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+        // On récupère juste le premier message de violation pour simplifier
+        String message = ex.getConstraintViolations()
+                .stream()
+                .map(cv -> cv.getMessage())
+                .findFirst()
+                .orElse("Violation de contrainte");
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
 }

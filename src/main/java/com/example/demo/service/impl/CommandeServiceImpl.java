@@ -126,11 +126,17 @@ public class CommandeServiceImpl implements CommandeService {
 
     @Override
     public void deleteCommande(Long id) {
-        if(!commandeRepository.existsById(id)){
-            throw new ResourceNotFoundException("Commande n'existe pas de id : "+id);
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Commande n'existe pas de id : " + id));
+
+        boolean hasStocks = stockRepository.existsByCommande(commande);
+        if (hasStocks) {
+            throw new IllegalStateException("Impossible de supprimer une commande déjà validée ou liée à des stocks.");
         }
-        commandeRepository.deleteById(id);
+
+        commandeRepository.delete(commande);
     }
+
 
     @Override
     @Transactional

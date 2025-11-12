@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -31,7 +32,8 @@ public class Stock {
     private LocalDateTime dateEntree;
 
     @NotNull(message="la quantité est obligatoire")
-    @Positive(message = "la quantité doit être positive")
+//    @Positive(message = "la quantité doit être positive")
+    @Min(0)
     private Integer quantite;
 
     @NotNull(message="le prix d'achat est obligatoire")
